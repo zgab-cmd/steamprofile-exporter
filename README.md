@@ -1,6 +1,7 @@
 # steamprofile-exporter
 
-A small Prometheus exporter for Steam profile status.
+A small Prometheus exporter for exporting playtime infos from Steam.
+95% vibecoded using Raptor mini, only using ~5 credits in total
 
 ## Build
 
@@ -17,10 +18,12 @@ This produces `steamprofile-exporter.exe`.
 The exporter reads configuration from environment variables:
 
 - `STEAM_API_KEY` — your Steam Web API key
-- `STEAM_ID` — your Steam ID or vanity profile name (e.g. `YOUR_STEAM_ID`)
+- `STEAM_ID` — your Steam ID or vanity profile name (the numbers or string after steamcommunity.com/id/...)
 - `LISTEN_ADDR` — optional listen address, default `:9805`
 
+Note: get your API key from here: https://steamcommunity.com/dev
 The exporter already supports Steam vanity names via `ResolveVanityURL`, so users can provide either a numeric SteamID or a custom URL name.
+The Steam API is only queried upon scraping the /metrics page, so it does not poll Steam continuously in the background.
 
 ## Metrics
 
@@ -34,6 +37,7 @@ The exporter exposes the following Prometheus metrics on `/metrics`:
 - `steam_persona_state_info{state="..."}` - info-style gauge with the human-readable state name, such as `online`, `offline`, `away`, or `busy`.
 - `steam_last_logoff_timestamp` - gauge, the Unix timestamp of the last logoff sent by Steam.
 
+Note: if your profile is set to private, your  state will always show up as 0
 
 ### Example `.env`
 
@@ -41,15 +45,26 @@ Copy `.env.example` to `.env` and fill in values:
 
 ```dotenv
 STEAM_API_KEY=YOUR_API_KEY_HERE
-STEAM_ID=YOUR_STEAM_ID
+STEAM_ID=YOUR_STEAM_ID_HERE
 LISTEN_ADDR=:9805
 ```
 
 ## Run locally
 
+Build the executable first:
+
+```powershell
+go build -o steamprofile-exporter.exe 
+```
+
 From PowerShell:
 
 ```powershell
+# create .env from the example if needed
+
+Copy-Item .env.example .env -ErrorAction SilentlyContinue
+
+
 # load env vars into the current shell
 Get-Content .env | ForEach-Object {
   if ($_ -match '^\s*([^#=]+)=(.*)$') {
@@ -60,8 +75,7 @@ Get-Content .env | ForEach-Object {
 }
 
 # run the exporter
-.
-\steamprofile-exporter.exe
+.\steamprofile-exporter.exe
 ```
 
 Then open:
@@ -69,6 +83,8 @@ Then open:
 ```powershell
 curl.exe http://localhost:9805/metrics
 ```
+
+Or just run the pre build .exe, but you still have to create an .env file under your C:\Users\youruser\ and load them in, using the above script
 
 ## Run on another Windows PC
 
@@ -90,7 +106,7 @@ $env:LISTEN_ADDR=':9805'
 
 ## Service installation (optional)
 
-For production use, install it as a Windows service. First set machine-level environment variables:
+For consistent use, install it as a Windows service. First set machine-level environment variables:
 
 ```powershell
 [Environment]::SetEnvironmentVariable('STEAM_API_KEY','USER_API_KEY','Machine')

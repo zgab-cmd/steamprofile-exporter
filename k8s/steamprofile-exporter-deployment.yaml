@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steamprofile-exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: steamprofile-exporter
+  template:
+    metadata:
+      labels:
+        app: steamprofile-exporter
+    spec:
+      containers:
+      - name: steamprofile-exporter
+        image: your-registry/steamprofile-exporter:latest
+        ports:
+        - containerPort: 9805
+        env:
+        - name: STEAM_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: steamprofile-exporter-secrets
+              key: steam_api_key
+        - name: STEAM_ID
+          valueFrom:
+            secretKeyRef:
+              name: steamprofile-exporter-secrets
+              key: steam_id
+        - name: LISTEN_ADDR
+          value: ":9805"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: steamprofile-exporter
+spec:
+  selector:
+    app: steamprofile-exporter
+  ports:
+  - port: 9805
+    targetPort: 9805
+    protocol: TCP
+    name: metrics
+  type: ClusterIP

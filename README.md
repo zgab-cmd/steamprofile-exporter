@@ -84,7 +84,53 @@ Then open:
 curl.exe http://localhost:9805/metrics
 ```
 
-Or just run the pre build .exe, but you still have to create an .env file under your C:\Users\youruser\ and load them in, using the above script
+## Linux / Docker support
+
+You can also run this exporter on Linux or in a container.
+
+Build a Linux executable with:
+
+```bash
+go build -o steamprofile-exporter-linux .
+```
+
+Build a Docker image with:
+
+```bash
+docker build -t steamprofile-exporter:latest .
+```
+
+Run the container with:
+
+```bash
+docker run --rm -p 9805:9805 \
+  -e STEAM_API_KEY='YOUR_API_KEY' \
+  -e STEAM_ID='YOUR_STEAM_ID_OR_VANITY' \
+  -e LISTEN_ADDR=':9805' \
+  steamprofile-exporter:latest
+```
+
+### Kubernetes / k3s
+
+A Kubernetes deployment manifest is available at `k8s/steamprofile-exporter-deployment.yaml`.
+
+Create the secret for your credentials:
+
+```bash
+kubectl create secret generic steamprofile-exporter-secrets \
+  --from-literal=steam_api_key='YOUR_API_KEY' \
+  --from-literal=steam_id='YOUR_STEAM_ID_OR_VANITY'
+```
+
+Apply the deployment:
+
+```bash
+kubectl apply -f k8s/steamprofile-exporter-deployment.yaml
+```
+
+If you want the exporter available outside the cluster, expose it with an ingress or LoadBalancer.
+
+Or just run the pre built .exe, but you still have to create an .env file under your C:\Users\youruser\ and load them in, using the above script
 
 ## Run on another Windows PC
 

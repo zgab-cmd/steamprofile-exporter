@@ -22,6 +22,14 @@ type responseEnvelope struct {
 	} `json:"response"`
 }
 
+type ownedGamesResponse struct {
+	Response struct {
+		Games []struct {
+			PlaytimeForever int64 `json:"playtime_forever"`
+		} `json:"games"`
+	} `json:"response"`
+}
+
 // FetchPlayerSummary synchronously calls the Steam Web API and returns the first player summary.
 // This is a simple HTTP GET and JSON decode. The function is deliberately synchronous because
 // the exporter will call it once per metrics scrape.
@@ -59,6 +67,37 @@ func FetchPlayerSummary(apiKey, steamID string) (*PlayerSummary, error) {
 		return nil, fmt.Errorf("no player data in response")
 	}
 	return &env.Response.Players[0], nil
+}
+
+// FetchPlayerPlaytimeTotalHours returns the total playtime across owned games in hours.
+func FetchPlayerPlaytimeTotalHours(apiKey, steamID string) (float64, error) {
+	url := fmt.Sprintf(
+		"https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=%s&steamid=%s&include_appinfo=0&include_played_free_games=1",
+		apiKey,
+		steamID,
+	)
+
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Get(url)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, fmt.Errorf("owned games API returned status %d", resp.StatusCode)
+	}
+
+	var env ownedGamesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&env); err != nil {
+		return 0, err
+	}
+
+	var totalMinutes int64
+	for _, game := range env.Response.Games {
+		totalMinutes += game.PlaytimeForever
+	}
+	return float64(totalMinutes) / 60, nil
 }
 
 // ResolveVanityURL converts a vanity name (custom profile name) to a 64-bit SteamID.

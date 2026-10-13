@@ -33,15 +33,16 @@ The Steam API is only queried when `/metrics` is scraped; nothing is polled in t
 
 Exposed on `/metrics`:
 
-- `steam_up` - `1` if the Steam API call succeeded, `0` if it failed.
-- `steam_scrape_duration_seconds` - how long the Steam API call took.
+- `steam_up` - `1` if all Steam API calls succeeded, `0` if any failed.
+- `steam_scrape_duration_seconds` - total duration of the Steam API requests.
 - `steam_in_game` - `1` when the player appears to be in a game, otherwise `0`.
 - `steam_current_game_info{game="..."}` - current game name as a label; only present when Steam returns one.
 - `steam_persona_state` - raw persona state from Steam (`0` to `7`).
 - `steam_persona_state_info{state="..."}` - human-readable state (`online`, `offline`, `away`, `busy`, ...).
 - `steam_last_logoff_timestamp` - Unix timestamp of the last logoff.
+- `steam_playtime_total_hours` - total playtime across owned games, including played free games, in hours.
 
-Note: if your Steam profile is private, the persona state will always be `0`.
+Note: if your Steam profile is private, the persona state will always be `0`. Steam may return no owned-game data for private game details, in which case total playtime is reported as `0`.
 
 ## Build from source
 

@@ -10,6 +10,8 @@ RUN apk add --no-cache ca-certificates \
     && CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /app/steamprofile-exporter .
 
 FROM scratch
+LABEL org.opencontainers.image.source="https://github.com/zgab-cmd/steamprofile-exporter" \
+      org.opencontainers.image.licenses="MIT"
 COPY --from=builder /app/steamprofile-exporter /steamprofile-exporter
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
 EXPOSE 9805

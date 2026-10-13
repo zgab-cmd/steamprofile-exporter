@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: steamprofile-exporter
-        image: your-registry/steamprofile-exporter:latest
+        image: ghcr.io/zgab-cmd/steamprofile-exporter:latest
         ports:
         - containerPort: 9805
         env:

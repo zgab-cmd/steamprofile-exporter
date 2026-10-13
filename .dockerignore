@@ -1,0 +1,7 @@
+.git
+.env
+.env.*
+steamprofile-exporter.exe
+steamprofile-exporter-linux
+steamprofile-exporter-v0.1.0.zip
+k8s

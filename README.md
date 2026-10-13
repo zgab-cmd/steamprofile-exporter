@@ -1,7 +1,9 @@
 # steamprofile-exporter
 
 A small Prometheus exporter for exporting playtime infos from Steam.
-95% vibecoded using Raptor mini, only using ~5 credits in total
+95% vibecoded using Raptor mini, only using ~5 credits in total, but works perfectly well
+
+Feel free to contribute!
 
 ## Build
 
